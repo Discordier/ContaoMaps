@@ -27,87 +27,51 @@ class ModuleCatalogWrapperContaoMap extends ModuleCatalogList
 
 	public function generate($latLngFilter='')
 	{
-		$this->latLngFilter=$latLngFilter;
+		$this->latLngFilter= $latLngFilter;
 		parent::generate();
 		return $this->items;
+	}
+
+	protected function processFieldSQL(array $arrVisible, $intCatalog, $strTable, $blnNoAlias =false)
+	{
+		$arrConverted = parent::processFieldSQL($arrVisible, $intCatalog, $strTable, $blnNoAlias);
+		if($this->latLngFilter)
+		{
+			$arrConverted[] = 'tl_catalog_geolocation.latitude AS latitude';
+			$arrConverted[] = 'tl_catalog_geolocation.longitude AS longitude';
+			$arrConverted[] = 'tl_catalog_geolocation.id AS locid';
+		}
+		return $arrConverted;
 	}
 
 	protected function compile()
 	{
 		$cols=array();
-		$cols = $this->processFieldSQL($this->catalog_visible);
+		$cols = $this->processFieldSQL($this->catalog_visible, $this->catalog, $this->objCatalogType->tableName);
 		if($this->catalog_iconfield)
 			$cols[] = $this->catalog_iconfield;
-		foreach($this->systemColumns as $col)
-			$cols[]=$col;
 		if($this->strAliasField)
 			$cols[] = $this->strAliasField;
 
-		$omitSQL = $this->omitMarkers?'AND c.id NOT IN ('.implode(', ', $this->omitMarkers).') ':'';
-		if($this->catalog_where)
-			$omitSQL .= ' AND '.$this->replaceInsertTags($this->catalog_where);
-		if(!BE_USER_LOGGED_IN && $this->publishField)
+		$filterurl = $this->parseFilterUrl($this->catalog_visible);
+		// Query Catalog
+		$filterurl = $this->addSearchFilter($filterurl);
+		$arrParams = $this->generateStmtParams($filterurl);
+		$strWhere = $this->generateStmtWhere($filterurl);
+		if($this->omitMarkers)
+			$strWhere .= ($strWhere?' AND ':''). 'id NOT IN ('.implode(',', $this->omitMarkers).')';
+		if($this->latLngFilter)
 		{
-			$omitSQL .= ' AND '.$this->publishField.'=1';
+			$arrJoins=array(
+				sprintf('RIGHT JOIN tl_catalog_geolocation ON (cat_id=%d AND item_id={{table}}.id)',
+				$this->catalog
+			));
+			$strWhere .= ($strWhere?' AND ':'') . $this->latLngFilter;
 		}
-		// add filters from URL.
-		$filterurl = $this->parseFilterUrl();
-		if (is_array($this->catalog_search) && strlen($this->catalog_search[0]) && is_array($filterurl['procedure']['search']))
-		{
-			// reset arrays
-			$searchProcedure = array();
-			$searchValues = array();
+		$this->catalog_visible = $cols;
+		$strOrder = $this->generateStmtOrderBy($filterurl);
+		$objCatalog = $this->fetchItems(0, 0, $strWhere, $strOrder, $arrParams, $arrJoins);
 
-			foreach($this->catalog_search as $field)
-			{
-				if (array_key_exists($field, $filterurl['procedure']['search']))
-				{
-					$searchProcedure[] = $filterurl['procedure']['search'][$field];
-					if (is_array($filterurl['values']['search'][$field]))
-					{
-						foreach($filterurl['values']['search'][$field] as $item)
-						{
-							$searchValues[] = $item;
-						}
-					}
-					else
-					{
-						$searchValues[] = $filterurl['values']['search'][$field];
-					}
-				}
-			}
-
-			$filterurl['procedure']['where'][] = ' ('.implode(" OR ", $searchProcedure).')';
-			$filterurl['values']['where'] = is_array($filterurl['values']['where']) ? (array_merge($filterurl['values']['where'],$searchValues)) : $searchValues;
-
-		}
-
-		$params[0] = $this->catalog;
-		if (is_array($filterurl['values']['where'])) {
-			$params = array_merge($params, $filterurl['values']['where']);
-		}
-
-// add tags combination here...
-
-		if (is_array($filterurl['values']['tags'])) {
-			$params = array_merge($params, $filterurl['values']['tags']);
-		}
-
-		$this->catalog_query_mode = 'AND';
-		$this->catalog_tags_mode = 'AND';
-
-		$strCondition = $this->replaceInsertTags($this->catalog_where);
-		$strWhere = 
-			($filterurl['procedure']['where'] ? " AND ".implode(" ".$this->catalog_query_mode." ", $filterurl['procedure']['where']) : "")
-			// TODO: changing the catalog_tags_mode to catalog_query_mode here will allow us to filter multiple tags.
-			// 		 but this beares side kicks in ModuleCatalog aswell. Therefore we might rather want to add another combination method
-			//		 here?
-			.($filterurl['procedure']['tags'] ? " AND ".implode(" ".$this->catalog_tags_mode." ", $filterurl['procedure']['tags']) : "");
-
-
-		// end add filters from URL.
-		$objCatalogStmt = $this->Database->prepare('SELECT c.'.implode(', c.',$cols).", gl.longitude, gl.latitude, (SELECT name FROM tl_catalog_types WHERE tl_catalog_types.id=c.pid) AS catalog_name, (SELECT jumpTo FROM tl_catalog_types WHERE tl_catalog_types.id=c.pid) AS parentJumpTo FROM ".$this->strTable." c RIGHT JOIN tl_catalog_geolocation gl ON (gl.cat_id=c.pid AND gl.item_id=c.id) WHERE c.pid=? ".($omitSQL.$strWhere.$this->latLngFilter));
-		$objCatalog = $objCatalogStmt->execute($params);
 //		echo '/*'.$objCatalog->query.'*/';
 		$items=$this->generateCatalog($objCatalog, true, $this->catalog_visible);
 		$objCatalog->reset();
@@ -141,8 +105,8 @@ class ContaoMapLayerCatalog extends ContaoMapLayer
 		$omitIds=($omitObjects['marker'])?filter_var_array($omitObjects['marker'], FILTER_SANITIZE_NUMBER_INT):array();
 
 		$renderer = new ModuleCatalogWrapperContaoMap($objLayer, $omitIds, $this);
-		$area = ($objLayer->ignore_area_filter? '': $this->getAreaFilter('gl.latitude', 'gl.longitude'));
-		$items=$renderer->generate($area?' AND '.$area:'');
+		$area = ($objLayer->ignore_area_filter? '': $this->getAreaFilter('latitude', 'longitude'));
+		$items=$renderer->generate($area?$area:'');
 
 		// TODO: we have to find a better way to select icon images than this.
 		// Definately!
