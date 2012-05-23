@@ -24,7 +24,7 @@ $GLOBALS['BE_MOD']['content']['catalog']['fieldTypes']['geolocation'] = array
 		'eval'      => array
 		(
 			'alwaysSave' => true,
-			'mandatory'   => true,
+			'mandatory'   => false,
 		),
 		'save_callback' => array(array('CatalogGeolocationField', 'onSave')),
 		'load_callback' => array(array('CatalogGeolocationField', 'onLoad')),
