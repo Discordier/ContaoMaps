@@ -32,7 +32,7 @@ class ModuleCatalogWrapperContaoMap extends ModuleCatalogList
 		return $this->items;
 	}
 
-	protected function processFieldSQL(array $arrVisible, $intCatalog, $strTable, $blnNoAlias =false)
+	public function processFieldSQL(array $arrVisible, $intCatalog, $strTable, $blnNoAlias =false)
 	{
 		$arrConverted = parent::processFieldSQL($arrVisible, $intCatalog, $strTable, $blnNoAlias);
 		if($this->latLngFilter)
@@ -54,10 +54,12 @@ class ModuleCatalogWrapperContaoMap extends ModuleCatalogList
 			$cols[] = $this->strAliasField;
 
 		$filterurl = $this->parseFilterUrl($this->catalog_visible);
+$filterurl = array();
 		// Query Catalog
 		$filterurl = $this->addSearchFilter($filterurl);
 		$arrParams = $this->generateStmtParams($filterurl);
 		$strWhere = $this->generateStmtWhere($filterurl);
+
 		if($this->omitMarkers)
 			$strWhere .= ($strWhere?' AND ':''). 'id NOT IN ('.implode(',', $this->omitMarkers).')';
 		if($this->latLngFilter)
@@ -70,7 +72,9 @@ class ModuleCatalogWrapperContaoMap extends ModuleCatalogList
 		}
 		$this->catalog_visible = $cols;
 		$strOrder = $this->generateStmtOrderBy($filterurl);
-		$objCatalog = $this->fetchItems(0, 0, $strWhere, $strOrder, $arrParams, $arrJoins);
+//		$objCatalog = $this->fetchItems(0, 0, $strWhere, $strOrder, $arrParams, $arrJoins);
+		$objCatalog = $this->fetchCatalogItems($cols, $strWhere, $arrParams, $strOrder, 0, 0, $arrJoins);
+//fetchCatalogItems(array $arrFields, $strWhere ='', array $arrParams =array(), $strOrder ='', $intLimit =0, $intOffset =0, array $arrJoins=array())
 
 //		echo '/*'.$objCatalog->query.'*/';
 		$items=$this->generateCatalog($objCatalog, true, $this->catalog_visible);
