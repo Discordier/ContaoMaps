@@ -62,10 +62,10 @@ class CatalogGeolocationField extends Backend {
 									->execute($dc->activeRecord->pid, $dc->id);
 		if($objLatLong->numRows)
 			$this->Database->prepare('UPDATE tl_catalog_geolocation SET latitude=?, longitude=? WHERE cat_id=? AND item_id=?')
-							->execute($latLng[0], $latLng[1], $dc->activeRecord->pid, $dc->id);
+							->execute((float)$latLng[0], (float)$latLng[1], $dc->activeRecord->pid, $dc->id);
 		else
 			$this->Database->prepare('INSERT INTO tl_catalog_geolocation %s')
-							->set(array('latitude'=>$latLng[0], 'longitude'=>$latLng[1], 'cat_id'=>$dc->activeRecord->pid, 'item_id'=>$dc->id))
+							->set(array('latitude'=>(float)$latLng[0], 'longitude'=>(float)$latLng[1], 'cat_id'=>$dc->activeRecord->pid, 'item_id'=>$dc->id))
 							->execute();
 		return $varValue;
 	}

@@ -5,7 +5,7 @@
  * @copyright  Cyberspectrum 2012
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @package    ContaoMaps
- * @license    LGPL 
+ * @license    LGPL
  * @filesource
  */
 
@@ -32,9 +32,9 @@ class ModuleCatalogWrapperContaoMap extends ModuleCatalogList
 		return $this->items;
 	}
 
-	public function processFieldSQL(array $arrVisible, $intCatalog, $strTable, $blnNoAlias =false)
+	protected function processFieldSQL(array $arrVisible)
 	{
-		$arrConverted = parent::processFieldSQL($arrVisible, $intCatalog, $strTable, $blnNoAlias);
+		$arrConverted = parent::processFieldSQL($arrVisible);
 		if($this->latLngFilter)
 		{
 			$arrConverted[] = 'tl_catalog_geolocation.latitude AS latitude';
@@ -47,21 +47,19 @@ class ModuleCatalogWrapperContaoMap extends ModuleCatalogList
 	protected function compile()
 	{
 		$cols=array();
-		$cols = $this->processFieldSQL($this->catalog_visible, $this->catalog, $this->objCatalogType->tableName);
+		$cols = $this->processFieldSQL($this->catalog_visible);
 		if($this->catalog_iconfield)
 			$cols[] = $this->catalog_iconfield;
 		if($this->strAliasField)
 			$cols[] = $this->strAliasField;
 
 		$filterurl = $this->parseFilterUrl($this->catalog_visible);
-$filterurl = array();
 		// Query Catalog
 		$filterurl = $this->addSearchFilter($filterurl);
 		$arrParams = $this->generateStmtParams($filterurl);
 		$strWhere = $this->generateStmtWhere($filterurl);
-
 		if($this->omitMarkers)
-			$strWhere .= ($strWhere?' AND ':''). 'id NOT IN ('.implode(',', $this->omitMarkers).')';
+			$strWhere .= ($strWhere?' AND ':''). $this->strTable.'.id NOT IN ('.implode(',', $this->omitMarkers).')';
 		if($this->latLngFilter)
 		{
 			$arrJoins=array(
@@ -72,9 +70,7 @@ $filterurl = array();
 		}
 		$this->catalog_visible = $cols;
 		$strOrder = $this->generateStmtOrderBy($filterurl);
-//		$objCatalog = $this->fetchItems(0, 0, $strWhere, $strOrder, $arrParams, $arrJoins);
-		$objCatalog = $this->fetchCatalogItems($cols, $strWhere, $arrParams, $strOrder, 0, 0, $arrJoins);
-//fetchCatalogItems(array $arrFields, $strWhere ='', array $arrParams =array(), $strOrder ='', $intLimit =0, $intOffset =0, array $arrJoins=array())
+		$objCatalog = $this->fetchItems(0, 0, $strWhere, $strOrder, $arrParams, $arrJoins);
 
 //		echo '/*'.$objCatalog->query.'*/';
 		$items=$this->generateCatalog($objCatalog, true, $this->catalog_visible);
@@ -88,6 +84,14 @@ $filterurl = array();
 			$items[$i++]['latitude']=$objCatalog->latitude;
 		}
 		$this->items=$items;
+	}
+}
+
+class ImageSizer extends Controller
+{
+	public function getImage($image, $width, $height, $mode='', $target=null)
+	{
+		return parent::getImage($image, $width, $height, $mode, $target);
 	}
 }
 
@@ -116,13 +120,14 @@ class ContaoMapLayerCatalog extends ContaoMapLayer
 		// Definately!
 		// Backend config would be nice, but which one? Reader? Fieldconfig? Catalog itself?
 		$item=$items[0];
-		if(file_exists(TL_ROOT . '/'.$GLOBALS['TL_CONFIG']['uploadPath'].'/catalogmarker/'.$item['tablename'].'.png'))
-		{
-			$icon = $GLOBALS['TL_CONFIG']['uploadPath'].'/catalogmarker/'.$item['tablename'].'.png';
-		}
 		$iconsize = deserialize($objLayer->imageSize);
+		$objSizer = new ImageSizer();
 		foreach($items as $i=>$item)
 		{
+			if(file_exists(TL_ROOT . '/'.$GLOBALS['TL_CONFIG']['uploadPath'].'/catalogmarker/'.$item['data']['organismen_kategorie']['ref'][0]['alias'].'.png'))
+			{
+				$icon = $GLOBALS['TL_CONFIG']['uploadPath'].'/catalogmarker/'.$item['data']['organismen_kategorie']['ref'][0]['alias'].'.png';
+			}
 			$tpl = new FrontendTemplate($objLayer->catalog_template);
 			$tpl->entries=array($item);
 			$objMarker = new $strClass(array(
@@ -132,14 +137,14 @@ class ContaoMapLayerCatalog extends ContaoMapLayer
 			if($objLayer->catalog_iconfield && $item[$objLayer->catalog_iconfield])
 			{
 				// TODO: ensure that only one image is in the field, no image gallery
-				$objMarker->icon = $this->getImage($this->urlEncode($item[$objLayer->catalog_iconfield]), $iconsize[0], $iconsize[1], $iconsize[2]);
+				$objMarker->icon = $objSizer->getImage($this->urlEncode($item[$objLayer->catalog_iconfield]), $iconsize[0], $iconsize[1], $iconsize[2]);
 			} elseif($icon)
 			{
-				$objMarker->icon = $icon;
+				$objMarker->icon = $objSizer->getImage($this->urlEncode($icon), $iconsize[0], $iconsize[1], $iconsize[2]);
 			}
 			if($objMarker->icon)
 			{
-				$objIcon = new File($pointdata['icon']);
+				$objIcon = new File($objMarker->icon);
 				$objMarker->iconsize = $objIcon->width.','.$objIcon->height;
 				$objMarker->iconposition = sprintf('%s,%s', floor($objIcon->width/2), floor($objIcon->height/2));
 			}
