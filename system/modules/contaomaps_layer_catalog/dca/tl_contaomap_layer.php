@@ -5,7 +5,7 @@
  * @copyright  Cyberspectrum 2012
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @package    ContaoMaps
- * @license    LGPL 
+ * @license    LGPL
  * @filesource
  */
 
@@ -25,7 +25,7 @@ $GLOBALS['TL_DCA']['tl_contaomap_layer']['list']['operations']
 );
 
 // Palettes
-$GLOBALS['TL_DCA']['tl_contaomap_layer']['palettes']['catalog'] = '{title_legend},name,alias,type,ignore_area_filter,mgrtype;{catalog_legend},catalog,catalog_template,catalog_jumpTo,catalog_visible,catalog_where,catalog_iconfield,imageSize';
+$GLOBALS['TL_DCA']['tl_contaomap_layer']['palettes']['catalog'] = '{title_legend},name,alias,type,ignore_area_filter,mgrtype;{catalog_legend},catalog,catalog_template,catalog_jumpTo,catalog_visible,catalog_where,catalog_icon,catalog_iconfield,imageSize';
 
 // Fields
 
@@ -84,6 +84,13 @@ $GLOBALS['TL_DCA']['tl_contaomap_layer']['fields']['catalog_iconfield'] = array
 	'eval'                    => array()
 );
 
+$GLOBALS['TL_DCA']['tl_contaomap_layer']['fields']['catalog_icon'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_contaomap_layer']['catalog_icon'],
+	'exclude'                 => true,
+	'inputType'               => 'fileTree',
+	'eval'                    => array('fieldType'=>'radio', 'files'=>true, 'tl_class'=>'clr')
+);
 
 class tl_contaomap_layer_catalog extends Backend
 {
@@ -131,7 +138,7 @@ class tl_contaomap_layer_catalog extends Backend
 			$arrTypes=$GLOBALS['BE_MOD']['content']['catalog']['typesCatalogFields'];
 		$fields = array();
 		$chkImage = $blnImage ? " AND c.showImage=1" : "";
-		
+
 		$objFields = $this->Database->prepare("SELECT c.* FROM tl_catalog_fields c WHERE c.pid=? AND c.type IN ('" . implode("','", $arrTypes) . "')".$chkImage." ORDER BY c.sorting ASC")
 							->execute($dc->activeRecord->catalog);
 
@@ -155,7 +162,7 @@ class tl_contaomap_layer_catalog extends Backend
 		if(!$arrTypes)
 			$arrTypes=$GLOBALS['BE_MOD']['content']['catalog']['typesCatalogFields'];
 		$fields = array('' => '-');
-		
+
 		$objFields = $this->Database->prepare("SELECT c.* FROM tl_catalog_fields c WHERE c.pid=? AND c.type IN ('" . implode("','", $arrTypes) . "') AND c.showImage=1 ORDER BY c.sorting ASC")
 							->execute($dc->activeRecord->catalog);
 

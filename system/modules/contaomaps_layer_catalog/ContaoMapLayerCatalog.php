@@ -124,10 +124,13 @@ class ContaoMapLayerCatalog extends ContaoMapLayer
 		$objSizer = new ImageSizer();
 		foreach($items as $i=>$item)
 		{
-			if(file_exists(TL_ROOT . '/'.$GLOBALS['TL_CONFIG']['uploadPath'].'/catalogmarker/'.$item['data']['organismen_kategorie']['ref'][0]['alias'].'.png'))
+			if($objLayer->catalog_icon && file_exists(TL_ROOT . '/'. $objLayer->catalog_icon))
 			{
-				$icon = $GLOBALS['TL_CONFIG']['uploadPath'].'/catalogmarker/'.$item['data']['organismen_kategorie']['ref'][0]['alias'].'.png';
+				$icon = $objLayer->catalog_icon;
+			} else {
+				unset($icon);
 			}
+
 			$tpl = new FrontendTemplate($objLayer->catalog_template);
 			$tpl->entries=array($item);
 			$objMarker = new $strClass(array(

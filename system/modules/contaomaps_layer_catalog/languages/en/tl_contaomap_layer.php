@@ -5,7 +5,7 @@
  * @copyright  Cyberspectrum 2012
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @package    ContaoMaps
- * @license    LGPL 
+ * @license    LGPL
  * @filesource
  */
 
@@ -25,6 +25,7 @@ $GLOBALS['TL_LANG']['tl_contaomap_layer']['catalog_jumpTo']= array('JumpTo page'
 $GLOBALS['TL_LANG']['tl_contaomap_layer']['catalog_visible']= array('Visible fields', 'Please select all visible fields.');
 $GLOBALS['TL_LANG']['tl_contaomap_layer']['catalog_where']= array('Filter criteria', 'Please specify any filter you like in SQL notation (i.e. published=1).');
 $GLOBALS['TL_LANG']['tl_contaomap_layer']['catalog_iconfield']= array('Icon field', 'Please select the field that shall be used for the "per item" marker-icon (if any).');
+$GLOBALS['TL_LANG']['tl_contaomap_layer']['catalog_icon']= array('Icon', 'Use this icon for all entries. If you specify an icon field, that one will override this icon here.');
 
 /**
  * Layer types

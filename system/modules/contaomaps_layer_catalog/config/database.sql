@@ -9,14 +9,14 @@
 
 --
 -- Table `tl_catalog_geolocation`
--- 
+--
 
 CREATE TABLE `tl_catalog_geolocation` (
 -- id for this entry
   `id` int(10) unsigned NOT NULL auto_increment,
 -- id of the catalog
   `cat_id` int(10) unsigned NOT NULL default '0',
--- id of the item in the catalog 
+-- id of the item in the catalog
   `item_id` int(10) unsigned NOT NULL default '0',
 -- coords in map
   `latitude` float(10,7) NOT NULL default '0.0000000',
@@ -27,7 +27,7 @@ CREATE TABLE `tl_catalog_geolocation` (
 
 --
 -- Table `tl_contaomap_layer`
--- 
+--
 
 CREATE TABLE `tl_contaomap_layer` (
   `catalog` int(10) unsigned NOT NULL default '0',
@@ -37,6 +37,7 @@ CREATE TABLE `tl_contaomap_layer` (
 -- new catalog conditions
   `catalog_where` text NULL,
   `catalog_iconfield` varchar(32) NOT NULL default '',
+  `catalog_icon` varchar(255) NOT NULL default '',
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
