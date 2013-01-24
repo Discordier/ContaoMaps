@@ -32,9 +32,9 @@ class ModuleCatalogWrapperContaoMap extends ModuleCatalogList
 		return $this->items;
 	}
 
-	protected function processFieldSQL(array $arrVisible)
+	protected function processFieldSQL(array $arrVisible, $intCatalog, $strTable, $blnNoAlias = false)
 	{
-		$arrConverted = parent::processFieldSQL($arrVisible);
+		$arrConverted = parent::processFieldSQL($arrVisible, $intCatalog, $strTable, $blnNoAlias);
 		if($this->latLngFilter)
 		{
 			$arrConverted[] = 'tl_catalog_geolocation.latitude AS latitude';
@@ -47,7 +47,7 @@ class ModuleCatalogWrapperContaoMap extends ModuleCatalogList
 	protected function compile()
 	{
 		$cols=array();
-		$cols = $this->processFieldSQL($this->catalog_visible);
+		$cols = $this->processFieldSQL($this->catalog_visible, $this->catalog, $this->strTable);
 		if($this->catalog_iconfield)
 			$cols[] = $this->catalog_iconfield;
 		if($this->strAliasField)
