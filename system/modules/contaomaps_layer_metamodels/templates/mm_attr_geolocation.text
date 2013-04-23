@@ -1,0 +1,1 @@
+<?php echo $this->raw['latitude']; ?>;<?php echo $this->raw['longitude']; ?>

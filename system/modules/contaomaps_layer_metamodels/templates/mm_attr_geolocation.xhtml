@@ -1,0 +1,25 @@
+<?php
+	/**
+	 * for manipulating the static google map, please refer to:
+	 * https://developers.google.com/maps/documentation/staticmaps/
+	 */
+	if (Environment::getInstance()->ssl)
+	{
+		$strUrl = 'https://maps.google.com/maps/api/staticmap?sensor=false';
+	} else {
+		$strUrl = 'http://maps.google.com/maps/api/staticmap?sensor=false';
+	}
+
+	$arrParams = array();
+	$arrParams['zoom'] = 10;
+	$arrParams['maptype'] = 'roadmap';
+	$arrParams['markers'] = sprintf('color:blue|%s,%s', $this->raw['latitude'], $this->raw['longitude']);
+	$arrParams['size'] = '128x128';
+
+	// encode the url
+	$strParams = '';
+	foreach ($arrParams as $strKey => $strValue)
+	{
+		$strParams .= sprintf('&%s=%s', $strKey, urlencode($strValue));
+	}
+?><img src="<?php echo $strUrl . $strParams; ?>" border="0" />
