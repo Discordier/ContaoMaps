@@ -52,6 +52,11 @@ class MetaModelAttributeGeolocation extends MetaModelAttributeComplex
 			'map_remote_country'
 		));
 	}
+	
+	protected function getValueTable()
+	{
+		return 'tl_metamodel_translatedlongblob';
+	}
 
 	/**
 	 * {@inheritdoc}
@@ -109,7 +114,7 @@ class MetaModelAttributeGeolocation extends MetaModelAttributeComplex
 	 * Returns no values as geolocation does not support filtering via options (as it is pretty useless)
 	 *
 	 */
-	public function getFilterOptions($arrIds, $usedOnly)
+	public function getFilterOptions($arrIds, $usedOnly, &$arrCount = NULL)
 	{
 		return array();
 	}
@@ -138,7 +143,7 @@ class MetaModelAttributeGeolocation extends MetaModelAttributeComplex
 		return $arrReturn;
 	}
 
-	protected function sanitizeValue(&$arrValue)
+	protected function sanitizeValue($arrValue)
 	{
 		if($arrValue === null)
 		{
@@ -148,16 +153,28 @@ class MetaModelAttributeGeolocation extends MetaModelAttributeComplex
 				'latitude'   => 0
 			);
 		}
+		
+		$arrReturn = array();
 
 		if($arrValue['longitude'] === null)
 		{
-			$arrValue['longitude'] = 0;
+			$arrReturn['longitude'] = 0;
+		}
+		else
+		{
+			$arrReturn['longitude'] = $arrValue['longitude'];
 		}
 
 		if($arrValue['latitude'] === null)
 		{
 			$arrValue['latitude'] = 0;
 		}
+		else
+		{
+			$arrReturn['latitude'] = $arrValue['latitude'];
+		}
+		
+		return $arrReturn;
 	}
 
 	public function setDataFor($arrValues)
@@ -179,7 +196,7 @@ class MetaModelAttributeGeolocation extends MetaModelAttributeComplex
 
 		$arrNewItemIds = array_diff($arrItemIds, $arrExistingItemIds);
 
-		foreach ($arrNewItemIds as $intItemId)
+		foreach ($arrExistingItemIds as $intItemId)
 		{
 			$arrValue = $this->sanitizeValue($arrValues[$intItemId]);
 			$objDB->prepare('UPDATE tl_metamodel_geolocation %s WHERE att_id=? AND item_id=?')
@@ -200,8 +217,28 @@ class MetaModelAttributeGeolocation extends MetaModelAttributeComplex
 
 	public function unsetDataFor($arrIds)
 	{
-		// FIXME: unimplemented
-		throw new Exception('MetaModelAttributeTags::unsetDataFor() is not yet implemented, please do it or find someone who can!', 1);
+		$objDB = Database::getInstance();
+
+		$strWhereIds = '';
+		if ($arrIds)
+		{
+			if (is_array($arrIds))
+			{
+				$strWhereIds = ' AND item_id IN (' . implode(',', $arrIds) . ')';
+			} else {
+				$strWhereIds = ' AND item_id='. $mixIds;
+			}
+		}
+		
+		$arrWhere = array(
+			'procedure' => 'att_id=?' . $strWhereIds,
+			'params' => array(intval($this->get('id')))
+		);		
+		
+		$strQuery = 'DELETE FROM ' . $this->getValueTable() . ($arrWhere ? ' WHERE ' . $arrWhere['procedure'] : '');
+
+		$objDB->prepare($strQuery)
+			  ->execute(($arrWhere ? $arrWhere['params'] : null));
 	}
 }
 ?>
