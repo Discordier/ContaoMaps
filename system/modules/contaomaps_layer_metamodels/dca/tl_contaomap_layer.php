@@ -198,7 +198,7 @@ class tl_contaomap_layer_metamodels extends Backend
 
 	public function getMetaModelsWithGeoLocation(DataContainer $dc)
 	{
-		$objCatalogs = $this->Database->prepare('SELECT id,name FROM tl_metamodel')->execute();
+		$objCatalogs = \Database::getInstance()->prepare('SELECT id,name FROM tl_metamodel')->execute();
 		$catalogs=array();
 		// TODO: filter for geo location attributes here.
 		while ($objCatalogs->next())
@@ -216,7 +216,7 @@ class tl_contaomap_layer_metamodels extends Backend
 		}
 
 		// Get basic informations
-		$objLayer = $this->Database
+		$objLayer = \Database::getInstance()
 				->prepare('SELECT type, metamodel, metamodel_filtering FROM tl_contaomap_layer WHERE id=?')
 				->limit(1)
 				->execute($objDC->id);
