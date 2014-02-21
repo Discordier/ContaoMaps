@@ -22,7 +22,7 @@
  * @subpackage Frontend
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  */
-class MetaModelListContaoMaps extends MetaModelList
+class MetaModelListContaoMaps extends MetaModels\ItemList
 {
 	/**
 	 * Ignore area filter for ajax requests.
@@ -200,6 +200,13 @@ class MetaModelListContaoMaps extends MetaModelList
 		}
 		$strLocationAttr = $objAttr->getColName();
 
+		//check for icon
+		$objIcon = null;
+		if ($objCaller->metamodel_icon != null)
+		{
+			$objIcon=\FilesModel::findByUuid($objCaller->metamodel_icon);
+		}
+
 		foreach ($this->objItems as $objItem)
 		{
 			$this->objTemplate->data = ($this->objItems->getCount() && !$blnNoNativeParsing) ? array($objItem->parseValue($this->strOutputFormat, $this->objView)) : array();
@@ -207,7 +214,8 @@ class MetaModelListContaoMaps extends MetaModelList
 
 			$objMarker = new $strClass(array(
 				'jsid' => 'marker_'.$objItem->get('id'),
-				'infotext' => $this->objTemplate->parse($this->strOutputFormat)
+				'infotext' => $this->objTemplate->parse($this->objView->get('format')),
+				'icon' => ($objIcon != null)? $objIcon->path : ''
 			));
 
 			$arrPosition = $objItem->get($strLocationAttr);

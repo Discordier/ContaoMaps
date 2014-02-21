@@ -25,7 +25,7 @@ $GLOBALS['TL_DCA']['tl_contaomap_layer']['list']['operations']
 );
 
 // Palettes
-$GLOBALS['TL_DCA']['tl_contaomap_layer']['palettes']['metamodel'] = '{title_legend},name,alias,type,ignore_area_filter,mgrtype;{mm_config_legend},metamodel,metamodel_att,perPage,metamodel_use_limit;{mm_filter_legend},metamodel_sortby,metamodel_sortby_direction,metamodel_filtering,metamodel_filterparams;{mm_rendering},metamodel_rendersettings,metamodel_noparsing;';
+$GLOBALS['TL_DCA']['tl_contaomap_layer']['palettes']['metamodel'] = '{title_legend},name,alias,type,ignore_area_filter,mgrtype;{mm_config_legend},metamodel,metamodel_att,perPage,metamodel_use_limit;{mm_filter_legend},metamodel_sortby,metamodel_sortby_direction,metamodel_filtering,metamodel_filterparams;{mm_rendering},metamodel_rendersettings,metamodel_noparsing,metamodel_icon;';
 
 $GLOBALS['TL_DCA']['tl_contaomap_layer']['palettes']['__selector__'][] = 'metamodel_use_limit';
 
@@ -175,7 +175,14 @@ array_insert($GLOBALS['TL_DCA']['tl_contaomap_layer']['fields'], 1, array(
 				),
 			),
 		)
-	)
+	),
+	'metamodel_icon' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_contaomap_layer']['metamodel_icon'],
+			'inputType'               => 'fileTree',
+			'search'                  => false,
+			'eval'                    => array('files'=>true,'filesOnly'=>true,'fieldType'=>'radio','maxlength'=>255, 'tl_class' => 'clr')
+		),
 ));
 
 class tl_contaomap_layer_metamodels extends Backend
