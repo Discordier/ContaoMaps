@@ -33,7 +33,7 @@ order by Dist
 */
 
 // class to inject the field data into the page META-tags.
-class MetaModelAttributeGeolocation extends MetaModelAttributeComplex
+class MetaModelAttributeGeolocation extends \MetaModels\Attribute\BaseComplex
 {
 
 	/////////////////////////////////////////////////////////////////

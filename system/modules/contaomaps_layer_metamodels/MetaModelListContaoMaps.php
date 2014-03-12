@@ -109,7 +109,7 @@ class MetaModelListContaoMaps extends MetaModels\ItemList
 		if ($this->arrOmitIds)
 		{
 			// add filter rule for omitting already known objects to filter.
-			$this->objFilter->addFilterRule(new MetaModelFilterRuleSimpleQuery(
+			$this->objFilter->addFilterRule(new \MetaModels\Filter\Rules\SimpleQuery(
 				sprintf('SELECT * FROM tl_metamodel_geolocation WHERE att_id=? AND item_id NOT IN (%s)', implode(',', $this->arrOmitIds)),
 				array($this->intAttrId),
 				'item_id')
@@ -118,7 +118,7 @@ class MetaModelListContaoMaps extends MetaModels\ItemList
 		if ($this->strAreaFilter)
 		{
 			// add area filter rule to filter.
-			$this->objFilter->addFilterRule(new MetaModelFilterRuleSimpleQuery(
+			$this->objFilter->addFilterRule(new \MetaModels\Filter\Rules\SimpleQuery(
 				'SELECT * FROM tl_metamodel_geolocation WHERE att_id=? AND ' . $this->strAreaFilter,
 				array($this->intAttrId),
 				'item_id')
