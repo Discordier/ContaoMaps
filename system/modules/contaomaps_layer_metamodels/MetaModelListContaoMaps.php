@@ -210,7 +210,7 @@ class MetaModelListContaoMaps extends MetaModels\ItemList
 		foreach ($this->objItems as $objItem)
 		{
 			$this->objTemplate->data = ($this->objItems->getCount() && !$blnNoNativeParsing) ? array($objItem->parseValue($this->strOutputFormat, $this->objView)) : array();
-			$this->objTemplate->items = array($objItem);
+            $this->objTemplate->items = $this->objItems;
 
 			$objMarker = new $strClass(array(
 				'jsid' => 'marker_'.$objItem->get('id'),
