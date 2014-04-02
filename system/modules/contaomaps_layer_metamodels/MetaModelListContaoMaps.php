@@ -22,7 +22,7 @@
  * @subpackage Frontend
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  */
-class MetaModelListContaoMaps extends MetaModelList
+class MetaModelListContaoMaps extends MetaModels\ItemList
 {
 	/**
 	 * Ignore area filter for ajax requests.
@@ -109,7 +109,7 @@ class MetaModelListContaoMaps extends MetaModelList
 		if ($this->arrOmitIds)
 		{
 			// add filter rule for omitting already known objects to filter.
-			$this->objFilter->addFilterRule(new MetaModelFilterRuleSimpleQuery(
+			$this->objFilter->addFilterRule(new \MetaModels\Filter\Rules\SimpleQuery(
 				sprintf('SELECT * FROM tl_metamodel_geolocation WHERE att_id=? AND item_id NOT IN (%s)', implode(',', $this->arrOmitIds)),
 				array($this->intAttrId),
 				'item_id')
@@ -118,7 +118,7 @@ class MetaModelListContaoMaps extends MetaModelList
 		if ($this->strAreaFilter)
 		{
 			// add area filter rule to filter.
-			$this->objFilter->addFilterRule(new MetaModelFilterRuleSimpleQuery(
+			$this->objFilter->addFilterRule(new \MetaModels\Filter\Rules\SimpleQuery(
 				'SELECT * FROM tl_metamodel_geolocation WHERE att_id=? AND ' . $this->strAreaFilter,
 				array($this->intAttrId),
 				'item_id')
@@ -200,14 +200,23 @@ class MetaModelListContaoMaps extends MetaModelList
 		}
 		$strLocationAttr = $objAttr->getColName();
 
+		//check for icon
+		$objIcon = null;
+		if ($objCaller->metamodel_icon != null)
+		{
+			$objIcon=\FilesModel::findByUuid($objCaller->metamodel_icon);
+		}
+
 		foreach ($this->objItems as $objItem)
 		{
 			$this->objTemplate->data = ($this->objItems->getCount() && !$blnNoNativeParsing) ? array($objItem->parseValue($this->strOutputFormat, $this->objView)) : array();
-			$this->objTemplate->items = array($objItem);
+            $this->objTemplate->item = $objItem;
+            $this->objTemplate->items = $this->objItems;
 
 			$objMarker = new $strClass(array(
 				'jsid' => 'marker_'.$objItem->get('id'),
-				'infotext' => $this->objTemplate->parse($this->strOutputFormat)
+				'infotext' => $this->objTemplate->parse($this->objView->get('format')),
+				'icon' => ($objIcon != null)? $objIcon->path : ''
 			));
 
 			$arrPosition = $objItem->get($strLocationAttr);

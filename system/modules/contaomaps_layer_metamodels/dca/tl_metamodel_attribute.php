@@ -63,7 +63,7 @@ class tl_metamodel_attribute_geolocation extends Backend
 {
 	public function getTextFields(DataContainer $dc)
 	{
-		$objFields = $this->Database->prepare('SELECT name, colName FROM tl_metamodel_attribute WHERE pid=? AND type="text"')
+		$objFields = \Database::getInstance()->prepare('SELECT name, colName FROM tl_metamodel_attribute WHERE pid=? AND type="text"')
 				->execute($dc->getCurrentModel()->getProperty('pid'));
 		$result = array('' => '-');
 		while ($objFields->next())

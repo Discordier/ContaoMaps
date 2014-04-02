@@ -9,7 +9,7 @@
  * @filesource
  */
 
-abstract class ContaoMap extends System
+abstract class ContaoMap extends \Controller
 {
 	protected $layerIds = NULL;
 	protected $arrLayer = array();
@@ -36,16 +36,16 @@ abstract class ContaoMap extends System
 		$this->width = 640;
 		$this->height = 480;
 		$this->alttext = '';
-		$this->encoder=$this->Input->get('fmt');
+		$this->encoder=\Input::getInstance->get('fmt');
 		$this->template='mod_contaomaps';
 
-		if($this->Input->get('area'))
-			$this->setArea($this->Input->get('area'));
+		if(\Input::getInstance()->get('area'))
+			$this->setArea(\Input::getInstance()->get('area'));
 
 		// check if we have some ids we want to omit.
-		if($this->Input->post('known') && $this->Input->post('known')!='{}')
+		if(\Input::getInstance()->post('known') && \Input::getInstance()->post('known')!='{}')
 		{
-			$knownIds=$this->Input->post('known');
+			$knownIds=\Input::getInstance()->post('known');
 			if(!is_array($knownIds))
 				$knownIds=@json_decode($knownIds);
 			$realIds=array();
@@ -89,6 +89,8 @@ abstract class ContaoMap extends System
 		{
 			case 'center':
 				if(is_string($value))
+					$value=$this->replaceInsertTags($value);
+				if(is_string($value))
 					$value=explode(',', $value);
 				if(is_string($value))
 					$value=explode(' ', $value);
@@ -111,7 +113,7 @@ abstract class ContaoMap extends System
 				$this->viewPort[1] = $value;
 			break;
 			default:
-				throw new Exception('Can not set property '.$key);
+				parent::__set($key, $value);
 		}
 	}
 
@@ -141,7 +143,7 @@ abstract class ContaoMap extends System
 			case 'layer':
 				return $this->arrLayer;
 			default:
-				throw new Exception('Unknown property '.$key);
+				return parent::__get($key);
 			break;
 		}
 	}

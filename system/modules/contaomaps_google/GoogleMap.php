@@ -38,7 +38,7 @@ class GoogleMap extends ContaoMap
 		$this->views = array('normal');
 		$this->layerswitch = false;
 
-		$this->setKeys($arrData, array('zoom', 'sensor', 'params', 'zoomcontrol', 'mapcontrol', 'view', 'views', 'layerswitch'));
+		$this->setKeys($arrData, array('zoom', 'sensor', 'scrollwheel', 'params', 'styles', 'zoomcontrol', 'mapcontrol', 'view', 'views', 'layerswitch'));
 
 /*
 		// add map params.
@@ -55,11 +55,13 @@ class GoogleMap extends ContaoMap
 			case 'zoom':
 			case 'sensor':
 			case 'params':
+			case 'styles':
 			case 'zoomcontrol':
 			case 'mapcontrol':
 			case 'view':
 			case 'views':
 			case 'layerswitch':
+			case 'scrollwheel':
 				$this->arrOther[$key] = deserialize($value);
 			break;
 
@@ -76,11 +78,13 @@ class GoogleMap extends ContaoMap
 			case 'zoom':
 			case 'sensor':
 			case 'params':
+			case 'styles':
 			case 'zoomcontrol':
 			case 'mapcontrol':
 			case 'view':
 			case 'views':
 			case 'layerswitch':
+			case 'scrollwheel':
 				return array_key_exists($key, $this->arrOther) ? $this->arrOther[$key] : NULL;
 
 			default:
@@ -92,14 +96,14 @@ class GoogleMap extends ContaoMap
 	public function writeOptionsToTemplate(Template $objTemplate)
 	{
 		parent::writeOptionsToTemplate($objTemplate);
-		foreach(array('zoom', 'sensor', 'params', 'zoomcontrol', 'mapcontrol', 'view', 'views', 'layerswitch') as $key)
+		foreach(array('zoom', 'sensor', 'scrollwheel', 'params', 'styles', 'zoomcontrol', 'mapcontrol', 'view', 'views', 'layerswitch') as $key)
 			$objTemplate->$key=$this->$key;
 	}
 
 	public function jsonMapOptions()
 	{
 		$mapinfo='';
-		foreach(array('id' => 'name', 'zoom'=>'zoom','zoomcontrol'=>'zoomcontrol','center'=>'center','view'=>'view','aviews'=>'views','viewcontrol'=>'mapcontrol','params'=>'params', 'centerOnUser' => 'sensor', 'url' => 'ajaxUrl', 'layerswitch' => 'layerswitch', 'loadinganimation' => 'loadinganimation') as $k=>$v)
+		foreach(array('id' => 'name', 'zoom'=>'zoom','zoomControl'=>'zoomcontrol','center'=>'center','view'=>'view','aviews'=>'views','viewcontrol'=>'mapcontrol','params'=>'params','styles'=>'styles', 'centerOnUser' => 'sensor', 'url' => 'ajaxUrl', 'layerswitch' => 'layerswitch', 'loadinganimation' => 'loadinganimation') as $k=>$v)
 		{
 			if(!is_null($this->$v))
 				$v=deserialize($this->$v);
@@ -108,8 +112,31 @@ class GoogleMap extends ContaoMap
 			elseif(is_numeric($v))
 				$v = intval($v);
 			if($v)
+			{
+				//quickfox for handling zoomcontrol
+				if ($k == 'zoomControl') {
+					$v = ($v == 'none') ? false : true;
+				}
+				//prevent double json_encoding
+				if ($k == 'styles') {
+					$v = json_decode($v);
+				}
 				$mapinfo.=(strlen($mapinfo) ? ',':'').$k.':'.json_encode($v);
+			}
+				
 		}
+		
+		//quickfox for handling zoomcontrol options.This needs some optimisation as well as the zoomcontrol itself
+		if ($this->zoomcontrol != 'none')
+		{
+			$mapinfo.=(strlen($mapinfo) ? ',':'').'zoomControlOptions'.':{style:google.maps.ZoomControlStyle.'.strtoupper($this->zoomcontrol).'}';
+		}
+		//quickfix for scrollwheel
+		if ($this->scrollwheel )
+		{
+			$mapinfo.=(strlen($mapinfo) ? ',':'').'scrollwheel: false';
+		}
+		
 		$additional=$_GET;
 		if(count($_GET))
 			$mapinfo.=(strlen($mapinfo) ? ',':'').'additionalparams:'.json_encode($additional);
@@ -120,7 +147,7 @@ class GoogleMap extends ContaoMap
 	{
 		if(count($this->layerIds))
 		{
-			$objLayer=$this->Database->prepare('SELECT * FROM tl_googlemaplayer WHERE id IN ('.implode(',',$this->layerIds).')')->execute();
+			$objLayer=\Database::getInstance()->prepare('SELECT * FROM tl_googlemaplayer WHERE id IN ('.implode(',',$this->layerIds).')')->execute();
 			while($objLayer->next())
 			{
 				$layer = $objLayer->row();
@@ -175,8 +202,8 @@ class GoogleMap extends ContaoMap
 	 */
 	public function getAjaxXML()
 	{
-		if($this->Input->get('area'))
-			$this->setArea($this->Input->get('area'));
+		if(\Input::getInstance()->get('area'))
+			$this->setArea(\Input::getInstance()->get('area'));
 		$this->collectAll();
 		return $this->compileCustomIcons();
 	}

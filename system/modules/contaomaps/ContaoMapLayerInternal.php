@@ -28,7 +28,7 @@ class ContaoMapLayerInternal extends ContaoMapLayer
 		// assemble all user defined markers having valid coordinates from the database.
 		$omitSQL = (!BE_USER_LOGGED_IN?' AND published=1':'').($omitIds?' AND id NOT IN ('.implode(', ', $omitIds).') ':'');
 		$areaFilter = $this->getAreaFilter('latitude', 'longitude');
-		$objMarkers=$this->Database->prepare('SELECT * FROM tl_contaomap_marker WHERE pid=? '.$omitSQL.($areaFilter?' AND '.$areaFilter:''))
+		$objMarkers=\Database::getInstance()->prepare('SELECT * FROM tl_contaomap_marker WHERE pid=? '.$omitSQL.($areaFilter?' AND '.$areaFilter:''))
 									->execute(intval($this->id));
 		// loop over items and add them to the output.
 		while($objMarkers->next())
@@ -43,11 +43,12 @@ class ContaoMapLayerInternal extends ContaoMapLayer
 				$objMarker->zindex = $objLayer->zindex;
 			if($objMarkers->name)
 				$objMarker->name = $objMarkers->name;
-			$arrIcon=deserialize($objMarkers->icon);
-			if($arrIcon)
+			$objIcon=\FilesModel::findByUuid($objMarkers->icon);
+
+			if($objIcon)
 			{
-				$objMarker->icon = $arrIcon;
-				$objIcon = new File($arrIcon);
+				$objMarker->icon = $objIcon->path;
+				$objIcon = new File($objIcon->path);
 				$objMarker->iconsize = $objIcon->width.','.$objIcon->height;
 				if($objMarkers->anchor)
 					$objMarker->iconposition = $objMarkers->anchor;
@@ -75,7 +76,7 @@ class ContaoMapLayerInternal extends ContaoMapLayer
 			return;
 		$omitSQL = (!BE_USER_LOGGED_IN?' AND published=1':'').($omitPolygons?' AND id NOT IN ('.implode(', ', $omitPolygons).')':'');
 		$areaFilter = $this->getAreaIntersectFilter('min_latitude', 'max_latitude', 'min_longitude', 'max_longitude');
-		$objPolygons=$this->Database->prepare('SELECT * FROM tl_contaomap_polygon WHERE pid=? '.$omitSQL.($areaFilter?' AND '.$areaFilter:''))
+		$objPolygons=\Database::getInstance()->prepare('SELECT * FROM tl_contaomap_polygon WHERE pid=? '.$omitSQL.($areaFilter?' AND '.$areaFilter:''))
 									->execute(intval($this->id));
 		while($objPolygons->next())
 		{
@@ -103,7 +104,7 @@ class ContaoMapLayerInternal extends ContaoMapLayer
 			return;
 		$omitSQL = (!BE_USER_LOGGED_IN?' AND published=1':'').($omitPolylines?' AND id NOT IN ('.implode(', ', $omitPolylines).')':'');
 		$areaFilter = $this->getAreaIntersectFilter('min_latitude', 'max_latitude', 'min_longitude', 'max_longitude');
-		$objPolylines=$this->Database->prepare('SELECT * FROM tl_contaomap_polyline WHERE pid=? '.$omitSQL.($areaFilter?' AND '.$areaFilter:''))
+		$objPolylines=\Database::getInstance()->prepare('SELECT * FROM tl_contaomap_polyline WHERE pid=? '.$omitSQL.($areaFilter?' AND '.$areaFilter:''))
 									->execute(intval($this->id));
 		while($objPolylines->next())
 		{

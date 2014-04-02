@@ -22,10 +22,12 @@ $GLOBALS['TL_LANG']['tl_contaomap']['zoom']= array('Zoom-Stufe', 'Bitte wählen 
 $GLOBALS['TL_LANG']['tl_contaomap']['zoomcontrol']= array('Zoom-Controller', 'Bitte wählen Sie aus, welcher Controller zur Bewegung innerhalb der Karte vorhanden ist.');
 $GLOBALS['TL_LANG']['tl_contaomap']['mapcontrol']= array('Kartenansichts-Controller', 'Bitte wählen Sie aus, welcher Controller zum Wechsel der Kartenansicht vorhanden ist.');
 $GLOBALS['TL_LANG']['tl_contaomap']['sensor']= array('Sensor', 'Bitte wählen Sie, ob versucht werden soll die Position des Besuchers zu ermitteln und die Karte auf diese zentriert werden soll.');
+$GLOBALS['TL_LANG']['tl_contaomap']['scrollwheel']= array('Scrollrad ausschalten', 'Aktivieren Sie diese Checkbox, wenn das Scrollrad auf der Karte keine Funktion haben soll.');
 $GLOBALS['TL_LANG']['tl_contaomap']['coords']= array('Koordinaten des Kartenzentrums', 'Bitte geben Sie die Koordinaten ein, auf die die Karte zentriert werden soll.');
 $GLOBALS['TL_LANG']['tl_contaomap']['template']= array('Template', 'Verwendetes Template.');
 $GLOBALS['TL_LANG']['tl_contaomap']['layer']= array('Layer', 'Wählen Sie hier alle Kartenlayer, welche in dieser Karte angezeigt werden sollen.');
 $GLOBALS['TL_LANG']['tl_contaomap']['params']= array('Weitere Parameter', 'Hier können weitere Parameter eingegeben werden, z.B. zur Erzeugung multipler Markierungen.');
+$GLOBALS['TL_LANG']['tl_contaomap']['styles']= array('Styles', 'Hier können Styles als JSON-Array mit Style-Objekten übergeben. Siehe auch http://goo.gl/yOve');
 
 /**
  * References

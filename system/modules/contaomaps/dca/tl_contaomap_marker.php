@@ -189,7 +189,7 @@ class tl_contaomap_marker extends Backend
 	public function onSave($varValue, DataContainer $dc) {
 		// migrate values to location table.
 		$latLng=explode(',', $varValue);
-		$this->Database->prepare('UPDATE tl_contaomap_marker SET latitude=?, longitude=? WHERE id=?')
+		\Database::getInstance()->prepare('UPDATE tl_contaomap_marker SET latitude=?, longitude=? WHERE id=?')
 						->execute($latLng[0], $latLng[1], $dc->id);
 		return $varValue;
 	}
@@ -215,28 +215,28 @@ class tl_contaomap_marker extends Backend
 			$root = $this->User->maplayer;
 		}
 
-		$id = strlen($this->Input->get('id')) ? $this->Input->get('id') : CURRENT_ID;
+		$id = strlen(\Input::getInstance()->get('id')) ? \Input::getInstance()->get('id') : CURRENT_ID;
 
 		// Check current action
-		switch ($this->Input->get('act'))
+		switch (\Input::getInstance()->get('act'))
 		{
 			case 'paste':
 				// Allow
 				break;
 
 			case 'create':
-				if (!strlen($this->Input->get('pid')) || !in_array($this->Input->get('pid'), $root))
+				if (!strlen(\Input::getInstance()->get('pid')) || !in_array(\Input::getInstance()->get('pid'), $root))
 				{
-					$this->log('Not enough permissions to create markers in layer ID "'.$this->Input->get('pid').'"', 'tl_contaomap_marker checkPermission', TL_ERROR);
+					$this->log('Not enough permissions to create markers in layer ID "'.\Input::getInstance()->get('pid').'"', 'tl_contaomap_marker checkPermission', TL_ERROR);
 					$this->redirect('contao/main.php?act=error');
 				}
 				break;
 
 			case 'cut':
 			case 'copy':
-				if (!in_array($this->Input->get('pid'), $root))
+				if (!in_array(\Input::getInstance()->get('pid'), $root))
 				{
-					$this->log('Not enough permissions to '.$this->Input->get('act').' marker "'.$id.'" to layer ID "'.$this->Input->get('pid').'"', 'tl_contaomap_marker checkPermission', TL_ERROR);
+					$this->log('Not enough permissions to '.\Input::getInstance()->get('act').' marker "'.$id.'" to layer ID "'.\Input::getInstance()->get('pid').'"', 'tl_contaomap_marker checkPermission', TL_ERROR);
 					$this->redirect('contao/main.php?act=error');
 				}
 				// NO BREAK STATEMENT HERE
@@ -245,7 +245,7 @@ class tl_contaomap_marker extends Backend
 			case 'show':
 			case 'delete':
 			case 'toggle':
-				$objArchive = $this->Database->prepare("SELECT pid FROM tl_contaomap_marker WHERE id=?")
+				$objArchive = \Database::getInstance()->prepare("SELECT pid FROM tl_contaomap_marker WHERE id=?")
 											 ->limit(1)
 											 ->execute($id);
 
@@ -257,7 +257,7 @@ class tl_contaomap_marker extends Backend
 
 				if (!in_array($objArchive->pid, $root))
 				{
-					$this->log('Not enough permissions to '.$this->Input->get('act').' marker ID "'.$id.'" of layer ID "'.$objArchive->pid.'"', 'tl_contaomap_marker checkPermission', TL_ERROR);
+					$this->log('Not enough permissions to '.\Input::getInstance()->get('act').' marker ID "'.$id.'" of layer ID "'.$objArchive->pid.'"', 'tl_contaomap_marker checkPermission', TL_ERROR);
 					$this->redirect('contao/main.php?act=error');
 				}
 				break;
@@ -274,7 +274,7 @@ class tl_contaomap_marker extends Backend
 					$this->redirect('contao/main.php?act=error');
 				}
 
-				$objArchive = $this->Database->prepare("SELECT id FROM tl_contaomap_marker WHERE pid=?")
+				$objArchive = \Database::getInstance()->prepare("SELECT id FROM tl_contaomap_marker WHERE pid=?")
 											 ->execute($id);
 
 				if ($objArchive->numRows < 1)
@@ -289,9 +289,9 @@ class tl_contaomap_marker extends Backend
 				break;
 
 			default:
-				if (strlen($this->Input->get('act')))
+				if (strlen(\Input::getInstance()->get('act')))
 				{
-					$this->log('Invalid command "'.$this->Input->get('act').'"', 'tl_contaomap_marker checkPermission', TL_ERROR);
+					$this->log('Invalid command "'.\Input::getInstance()->get('act').'"', 'tl_contaomap_marker checkPermission', TL_ERROR);
 					$this->redirect('contao/main.php?act=error');
 				}
 				elseif (!in_array($id, $root))
@@ -315,9 +315,9 @@ class tl_contaomap_marker extends Backend
 	 */
 	public function toggleIcon($row, $href, $label, $title, $icon, $attributes)
 	{
-		if (strlen($this->Input->get('tid')))
+		if (strlen(\Input::getInstance()->get('tid')))
 		{
-			$this->toggleVisibility($this->Input->get('tid'), ($this->Input->get('state') == 1));
+			$this->toggleVisibility(\Input::getInstance()->get('tid'), (\Input::getInstance()->get('state') == 1));
 			$this->redirect($this->getReferer());
 		}
 
@@ -345,8 +345,8 @@ class tl_contaomap_marker extends Backend
 	public function toggleVisibility($intId, $blnVisible)
 	{
 		// Check permissions to edit
-		$this->Input->setGet('id', $intId);
-		$this->Input->setGet('act', 'toggle');
+		\Input::setGet('id', $intId);
+		\Input::setGet('act', 'toggle');
 		$this->checkPermission();
 		// Check permissions to publish
 		if (!$this->User->isAdmin && !$this->User->hasAccess('tl_contaomap_marker::published', 'alexf'))
@@ -365,7 +365,7 @@ class tl_contaomap_marker extends Backend
 			}
 		}
 		// Update the database
-		$this->Database->prepare("UPDATE tl_contaomap_marker SET tstamp=". time() .", published='" . ($blnVisible ? 1 : '') . "' WHERE id=?")
+		\Database::getInstance()->prepare("UPDATE tl_contaomap_marker SET tstamp=". time() .", published='" . ($blnVisible ? 1 : '') . "' WHERE id=?")
 					   ->execute($intId);
 		$this->createNewVersion('tl_contaomap_marker', $intId);
 	}
