@@ -36,7 +36,7 @@ abstract class ContaoMap extends \Controller
 		$this->width = 640;
 		$this->height = 480;
 		$this->alttext = '';
-		$this->encoder=\Input::getInstance->get('fmt');
+		$this->encoder=\Input::getInstance()->get('fmt');
 		$this->template='mod_contaomaps';
 
 		if(\Input::getInstance()->get('area'))
@@ -268,7 +268,7 @@ abstract class ContaoMap extends \Controller
 	protected function compileJavaScript()
 	{
 		return '<script type="text/javascript">/*<![CDATA[*/var '.$this->name.'=null;
-	window.addEvent("domready", function(){'.$this->name.'=(new ContaoMapping.Map'.($this->driver?'.'.$this->driver:'').'($("'.$this->name.'"), '.$this->jsonMapOptions().'));});'.
+	window.addEvent("domready", function(){'.$this->name.'=(new ContaoMapping.Map'.($this->driver?'.'.$this->driver:'').'(document.id("'.$this->name.'"), '.$this->jsonMapOptions().'));});'.
 	((version_compare(VERSION, '2.9', '>') && (!$GLOBALS['TL_CONFIG']['disableRefererCheck'])) ? 'var REQUEST_TOKEN="'.REQUEST_TOKEN.'";' : '').'
 	/*]]>*/</script>';
 	}
