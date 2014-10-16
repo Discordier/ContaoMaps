@@ -189,6 +189,7 @@ class MetaModelListContaoMaps extends MetaModels\ItemList
 		$this->objTemplate->noItemsMsg = $GLOBALS['TL_LANG']['MSC']['noItemsMsg'];
 
 		$this->prepare();
+		$strOutputFormat = $this->getOutputFormat();
 
 		$arrMarkers = array();
 
@@ -209,7 +210,7 @@ class MetaModelListContaoMaps extends MetaModels\ItemList
 
 		foreach ($this->objItems as $objItem)
 		{
-			$this->objTemplate->data = ($this->objItems->getCount() && !$blnNoNativeParsing) ? array($objItem->parseValue($this->strOutputFormat, $this->objView)) : array();
+			$this->objTemplate->data = ($this->objItems->getCount() && !$blnNoNativeParsing) ? array($objItem->parseValue($strOutputFormat, $this->objView)) : array();
             $this->objTemplate->item = $objItem;
             $this->objTemplate->items = $this->objItems;
 
